@@ -1,0 +1,307 @@
+//google translate TC&SC cookie
+document.gtLang = document.gtLang || function() {
+  var ckName = 'googtrans';
+  var ckSource = " "+document.cookie;
+  var langTrad = 'tc';
+  var langSimp = 'sc';
+  var ckValue, valArr, rtValue, start, dest;
+
+  start = ckSource.indexOf(" "+ckName+"=");
+  if (start == -1) start = ckSource.indexOf(";"+ckName+"=");
+  if (start == -1 || ckName == "") {
+    rtValue = langTrad;
+  } else {
+    dest = ckSource.indexOf(";", start+1);
+    if (dest == -1) dest = ckSource.length; 
+    ckValue = unescape(ckSource.substring(start+ckName.length+2, dest));
+    valArr = ckValue.split('/');
+    switch (valArr[valArr.length-1]) {
+      case "zh-CN":
+        rtValue = langSimp;
+        break;
+      case "zh-TW":
+        rtValue = langTrad;
+        break;
+      default:
+        rtValue = langTrad;
+    }
+  }
+  return rtValue;
+};
+
+// GEO location
+	var GeoDFP = {};
+	GeoDFP['D'] = '';
+	GeoDFP['CC'] = '';
+	GeoDFP['S'] = '';
+//local storage
+	storageSupported = typeof localStorage !== 'undefined' || typeof sessionStorage !== 'undefined';
+	storageEngine = window.localStorage || window.sessionStorage;
+	if (storageSupported) {
+		try {
+			storageEngine.setItem('geo-support-testing', 1);
+		} catch(e) {
+			storageSupported = false;
+		} finally {
+			storageEngine.removeItem('geo-support-testing');
+		}
+	}
+//expired
+	var localExpired = false;
+	
+	if (storageEngine.getItem('localeValid') === null){
+		localExpired = true;
+		storageEngine.setItem('localeValid', new Date().setTime(new Date().getTime() + 86400000));
+	} 
+	else {
+		var cacheDate = storageEngine.getItem('localeValid');
+		if (new Date().getTime() > cacheDate){
+			localExpired = true;
+			storageEngine.setItem('localeValid', new Date().setTime(new Date().getTime() + 86400000));
+		} 
+	}
+
+	
+if (storageSupported && storageEngine.getItem('GeoDFP') != null && !localExpired) {
+	GeoJson = JSON.parse(storageEngine.getItem('GeoDFP'));
+	GeoDFP['D'] = GeoJson['DFP']['D'];
+	GeoDFP['CC'] = GeoJson['DFP']['CC'];
+	GeoDFP['S'] = GeoJson['DFP']['S'];
+}
+else {
+	$.ajax({ 
+			url:'https://geoddsapi.nextmedia.com/geo_api?format=DFP', 
+			dataType: 'json',
+			timeout: 5000,
+			async: false,
+			success: function(response) {
+				var date = new Date();
+				var minutes = 60;
+				date.setTime(date.getTime() + (minutes * 60 * 1000));  
+				if (storageSupported) {
+					storageEngine.setItem('GeoDFP',JSON.stringify(response));
+					GeoDFP['D'] = response['DFP']['D'];
+					GeoDFP['CC'] = response['DFP']['CC'];
+					GeoDFP['S'] = response['DFP']['S'];
+				}
+				else{
+					GeoDFP['CC'] = 'TW';
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				if(textStatus === "timeout") {
+				   GeoDFP['CC'] = 'TW';
+				}
+			}
+	});
+}
+
+GeoDFP['L'] = document.gtLang().toUpperCase();
+
+	var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+// DFP
+(function() {
+	var useSSL = 'https:' == document.location.protocol;
+	var src = ( useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js';
+	document.write('<scr' + 'ipt async="async" src="' + src + '"></scr' + 'ipt>');
+})();
+
+if( typeof (gpt) === "undefined") {
+	var DFPID = (GeoDFP['CC'] == 'US' || GeoDFP['CC'] == 'CA')? 7350 : 7476;
+	var gpt = {
+		networkCode : DFPID,
+		
+		createAdSlot : function(adUnit, sizeString, divId, extras) {
+
+			var sizeArray;
+			switch (sizeString) {
+				case 'HeadBanner':
+					sizeArray = [970, 90];
+					break;
+				case 'LREC':
+					sizeArray = [300, 250];
+					break;
+				case 'MiniBanner':
+					sizeArray = [300, 100];
+					break;
+				case 'TextLink':
+					sizeArray = [300, 50];
+					break;
+				case 'FoodPromo':
+					sizeArray = [640, 250];
+					break;
+				case 'Interstitial':
+					sizeArray = [1, 1];
+					break;
+				default:
+          if (sizeString.indexOf('x') > -1) {
+            sizeString = sizeString.split('x');
+            if( typeof (sizeString) != 'undefined' && sizeString.length == 2) {
+              var width = parseInt(sizeString[0]);
+              var height = parseInt(sizeString[1]);
+              sizeArray = [width, height];
+            } else {
+              sizeArray = [1, 1];
+            }
+          } else if (typeof sizeString == 'object') {
+            sizeArray = sizeString;
+          }
+					break;
+			}
+			var adSlot = googletag.defineSlot('/' + this.networkCode + '/' + adUnit, sizeArray, divId);
+			adSlot.addService(googletag.pubads());
+			
+			var previewId = this.getUrlParam('dfppreview');
+			if( typeof (previewId ) != 'undefined' && previewId != '') {
+				adSlot.setTargeting('dfppreview', previewId);
+			}
+
+			for(var key in extras) {
+				if(extras.hasOwnProperty(key)) {
+					adSlot.setTargeting(key, extras[key]);
+				}
+			}
+			return adSlot;
+		}, 
+		
+		generateVideoAdTag : function(adUnit, sizeString, extras) {
+			var size;
+			switch (sizeString) {
+				case 'Preroll':
+					size = '640x360';
+					break;
+				default:
+					if(sizeString.indexOf('x') != -1) {
+						size = sizeString;
+					} else {
+						size = '640x360';
+					}
+					break;
+			}
+
+			adSlot = 'https://pubads.g.doubleclick.net/gampad/ads?';
+			adSlot += 'sz=' + size + '&';
+			adSlot += 'iu=' + encodeURIComponent('/' + this.networkCode + '/' + adUnit) + '&';
+			adSlot += 'ciu_szs=' + '&';
+			adSlot += 'impl=s&';
+			adSlot += 'gdfp_req=1&';
+			adSlot += 'env=vp&';
+			adSlot += 'output=vast&';
+			adSlot += 'unviewed_position_start=1&';
+			adSlot += 'url=[referrer_url]&';
+			adSlot += 'correlator=[timestamp]';
+			
+			var previewId = this.getUrlParam('dfppreview'); 
+			if( (typeof (previewId) != 'undefined' && previewId != '') || ( extras != null && typeof (extras) != 'undefined' ) ) {
+				adSlot += '&cust_params=';
+				if( typeof (previewId ) != 'undefined' && previewId != '') {
+					adSlot += encodeURIComponent('dfppreview=' + previewId + '&');
+				} 
+				
+				for(var key in extras) {
+					if(extras.hasOwnProperty(key)) {
+						adSlot += encodeURIComponent(key + '=' + extras[key] + '&');
+					}
+				}
+				
+			} 
+			return adSlot;
+		},
+		
+		enableServices : function() {
+			googletag.pubads().collapseEmptyDivs();
+			googletag.pubads().enableSyncRendering();
+			googletag.pubads().enableSingleRequest();
+			googletag.enableServices();
+		},
+		getUrlParam : function(name) {
+			name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+			var regexS = "[\\?&]" + name + "=([^&#]*)";
+			var regex = new RegExp(regexS);
+			var results = regex.exec(window.location.href);
+			if(results == null)
+				return "";
+			else
+				return results[1];
+		}
+	}
+}
+
+    document.String2Hex = document.String2Hex || function(tmp) {
+	    var str = '';
+	    for(var i = 0; i < tmp.length; i++) {
+	        str += tmp[i].charCodeAt(0).toString(16);
+	    }
+	    return str;
+	}
+
+	document.setCookie = document.setCookie || function(cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		//d.setTime(d.getTime() + (60 * 1000)); //Test with 1 min expire
+		var expires = "expires="+d.toUTCString();
+		document.cookie = cname + "=" + cvalue + ";" + expires + ";domain=.appledaily.com;path=/";
+	}
+
+	document.getCookie = document.getCookie || function(cname) {
+	    var name = cname + "=";
+	    var ca = document.cookie.split(';');
+	    for(var i = 0; i < ca.length; i++) {
+	        var c = ca[i];
+	        while (c.charAt(0) == ' ') {
+	            c = c.substring(1);
+	        }
+	        if (c.indexOf(name) == 0) {
+	        		            return c.substring(name.length, c.length);
+	        }
+	    }
+	    return "";
+	}
+	
+	
+	var crm_valid = document.getCookie("CrmValid");
+	
+	if( (typeof(crm_valid)=="undefined") || crm_valid===null || crm_valid.length==0 || (new Date().getTime() > crm_valid) ) {
+		var nxtu = document.getCookie("nxtu");
+		if( typeof(nxtu)!="undefined" || nxtu!=null || nxtu.length!=0 ) {
+			var crm_host = 'https://useg.nextdigital.com.hk/';
+			var k = document.String2Hex('ADAILY,'+new Date().getTime());
+			crm_host += '?nxtu=' + nxtu + '&k=' + k ;
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", crm_host, true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var response = JSON.parse(this.responseText);
+					if ('error' in response) {
+					}
+					else {
+						var crmObj = {};
+						for( var k in response.data)
+						{
+							crmObj[k] = response.data[k];
+							if(typeof(GeoDFP) != "undefined")
+							{
+								GeoDFP[k] = response.data[k];
+							}
+						}
+						document.setCookie('CrmJson', JSON.stringify(crmObj) , 1);
+						document.setCookie('CrmValid', (new Date().getTime() + 86400000), 1);
+					}
+				}
+				else {
+				} 
+			};
+		}
+	}else{
+        var crmJson= (document.getCookie("CrmJson")!="")?document.getCookie("CrmJson"):"{}";
+		var crmObj = JSON.parse( crmJson );
+		if((typeof(GeoDFP)!="undefined")&&(typeof(crmObj) == "object"))
+		{
+			for( var k in crmObj)
+			{
+				GeoDFP[k]=crmObj[k];
+			}
+		}
+	}

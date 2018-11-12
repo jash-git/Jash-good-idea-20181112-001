@@ -1,0 +1,97 @@
+function gdprMessage(selector,lang) {
+	console.log("gdprMessage "+lang)
+	var gdprCC = document.getElementById("gdpr-message").src.split("cc=")[1];
+	var gdprDm = document.getElementById("gdpr-message").src.split("gdpr-v2.js")[0];
+	//check cookie
+	var gdprAccepted = getGdprCookie();
+
+    if (typeof gdprAccepted !== "undefined" && gdprAccepted != "Y") {
+        // console.log("gdprCC is valid.");
+		//document.querySelector('head').innerHTML += '<link rel="stylesheet" href="'+gdprDm+'css/gdpr_s.css" type="text/css"/>';
+		var link = document.createElement('link');
+        link.type = "text/css";
+  		link.rel = "stylesheet"
+  		link.href = gdprDm+"css/gdpr_s.css";
+  		link.id = "gdprCss";
+  		document.getElementsByTagName('head')[0].appendChild(link);
+  		document.getElementById("gdprCss").addEventListener('load', function () {
+			var gdprMessageDiv = document.createElement('div');
+        	gdprMessageDiv.id = 'div-GDPR-message';
+        	gdprMessageDiv.style.cssText = 'position:relative;';
+            gdprMessageDiv.innerHTML = lang==="zh-TW"
+			?'<div class="cookies-container"><div class="cookie-title"><span><img src="//img.appledaily.com.tw/appledaily/images/header/img/apple.png"></span>蘋果日報網站更新隱私權聲明<br class="desktop-only"/></div><div class="cookie-content">為了提供更好的閱讀內容，我們使用相關網站技術來改善使用者體驗，也尊重用戶的隱私權，特別提出說明。<br class="desktop-only" /> <a href="https://tw.appledaily.com/index/privacy" style="text-decoration:underline;" target="_blank">了解最新隱私聲明</a></div><div class="cookie-btn"><a href="javascript:gdprAccp()" class="btn-accept">知道了</a></div></div>'
+			:'<div class="cookies-container"><div class="cookie-title"><span><img src="//img.appledaily.com.tw/appledaily/images/header/img/apple.png"></span>We use Cookie <br class="desktop-only"/> on our website</div><div class="cookie-content">This website uses cookies to ensure you get the best experience on our website.<br class="desktop-only" /> <a href="https://tw.appledaily.com/index/privacy" style="text-decoration:underline;" target="_blank">Learn more</a></div><div class="cookie-btn"><a href="javascript:gdprAccp()" class="btn-accept">Accept</a></div></div>';
+			//IE 11 handle
+			var el = document.querySelector(selector)?document.querySelector(selector):document.querySelector('body');
+			if (!!navigator.userAgent.match(/Trident\/7\./)) {
+				el.insertBefore(gdprMessageDiv, el.childNodes[0]);
+			} else {
+				el.prepend(gdprMessageDiv);
+			}
+		});
+    } else {
+        // console.log("gdprCC is invalid.");
+    }
+};
+
+function getGdprCookie() {
+	var name = "GDPR_ACCP=";
+	var ca = document.cookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+
+function setGdprCookie() {
+	var d = new Date();
+	d.setTime(1535558399000);
+	var expires = "expires=" + d.toUTCString();
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.appledaily.com";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.nextmedia.com";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.nextdigital.com.hk";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.appledaily.com.hk";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.appledaily.com.tw";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.ecjobs.com.hk";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.applespot.hk";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.deluxe.com.hk";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.nextmag.com.tw";
+	document.cookie = "GDPR_ACCP=Y;expires=Fri, 31 Dec 9999 23:59:59 GMT;path=/;domain=.tomonews.com";
+}
+
+function gdprAccp() {
+	// console.log("gdpr is accepted.");
+	setGdprCookie();
+	//track CMPG
+	if (typeof nxmTrack !== "undefined") {
+		var gdprCpreg = document.getElementById("gdpr-message").src.match(/cpreg=[\w]+/g)[0].substring(6);
+		var gdprPlat = document.getElementById("gdpr-message").src.match(/platform=[\w]+/g)[0].substring(9);
+		var ga_id = nxmTrack.readCookie('_ga');
+
+		//fire to CMPG
+		var cpmgParam = {
+			'ACTION': 'USER', //required
+			'CPREG': gdprCpreg, //required
+			'CPID': '1267', //required
+			'USRC': 'REG', //required
+			'PLATFORM': gdprPlat, //required
+			'TS': new Date().getTime(),
+			'Q': 'Y',
+			'ANS': ga_id,
+			'URL': window.location.hostname
+		};
+
+		nxmTrack.trackCMPG(cpmgParam);
+	}
+	document.getElementById("div-GDPR-message").style.cssText += 'display: none;';
+	//Callback
+	if (typeof gdprAccpCallback !== "undefined" && typeof gdprAccpCallback === "function") {
+		gdprAccpCallback();
+	}
+}

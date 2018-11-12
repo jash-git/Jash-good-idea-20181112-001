@@ -1,0 +1,505 @@
+/**
+ * JS wrapper for ANVATO Universal Web Player SDK
+ * Created By: Next Mobile Ltd.
+ * Version: 1.0.6
+ * Last modified date: 2018-06-27
+ *
+ **/
+
+var anvpLoadPath = '//w3.cdn.anvato.net/player/prod/v3/scripts/anvload.js'; // Production sdk load path, default
+
+var player_accessKey = 'GWj6LABb9ORMzHvD0jClHevWPlAvn3ok'; // default
+
+var player_token = 'pa8q2tUVMt1LEoNcIQnc3yXbnqnnn0Yhx02ew2DfSt0'; // default
+
+var player_360videoEnable = false;
+
+var player_liveModeEnable = false;
+
+var player_shareEnable = false; // Default disable native share
+
+var player_shareLink = '';
+
+var player_defaultFormat = 'mp4'; // Examples: mp4 | m3u8
+
+var player_defaultWidth = '640px';
+
+var player_defaultHeight = '360px';
+
+var player_defaultVolume = 1; // Between 0 to 1
+
+var player_autoPlay = true;
+
+var player_controlEnable = true;
+
+var player_forceHTML5 = true;
+
+var isMobile = (/iphone|ipad|ipod|android|blackberry|xbox|mini|windows phone|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+
+var dfpNetworkCode_default = 7350;
+
+window.anvp = window.anvp || {};
+
+anvp.common = {};
+
+anvp.common.config = {
+    accessKey: player_accessKey
+};
+
+var AnvatoPlayer = function (id) {
+    this.id = id;
+    this.anvpLoadPath = anvpLoadPath;
+    this.isMobile = isMobile;
+    this.dfpNetworkCode = dfpNetworkCode_default;
+    this.config = {
+        pInstance: id,
+        accessKey: player_accessKey,
+        token: player_token,
+        url: '',
+        format: player_defaultFormat,
+        live: player_liveModeEnable,
+        title: '',
+        description: '',
+        width: player_defaultWidth,
+        height: player_defaultHeight,
+        volume: player_defaultVolume,
+        autoplay: player_autoPlay,
+        share: player_shareEnable,
+        shareLink: player_shareLink,
+        control: player_controlEnable,
+        360: player_360videoEnable,
+        html5: player_forceHTML5,
+        plugins: {}
+    };
+}
+
+/*** Getters ***/
+AnvatoPlayer.prototype.getPlayerInstance = function () {
+    //For Anvato native API
+    return anvp[this.id];
+}
+
+/*** Setters ***/
+AnvatoPlayer.prototype.setSDKPath = function (sdkPath) {
+    this.anvpLoadPath = sdkPath;
+}
+
+AnvatoPlayer.prototype.setAccessKey = function (accessKey) {
+    this.config.accessKey = accessKey;
+}
+
+AnvatoPlayer.prototype.setToken = function (token) {
+    this.config.token = token;
+}
+
+AnvatoPlayer.prototype.setMcp = function (mcp) {
+    this.config.mcp = mcp;
+}
+
+AnvatoPlayer.prototype.setVideo = function (videoId) {
+    this.config.video = videoId;
+}
+
+AnvatoPlayer.prototype.setPlaylist = function (playlist) {
+    this.config.playlist = playlist;
+}
+
+AnvatoPlayer.prototype.setPlayer = function (player) {
+    this.config.player = player;
+}
+
+AnvatoPlayer.prototype.setVideoUrl = function (videoUrl) {
+    this.config.url = videoUrl;
+}
+
+AnvatoPlayer.prototype.setVideoFormat = function (format) {
+    this.config.format = format;
+}
+
+AnvatoPlayer.prototype.setLiveMode = function (enableLiveMode) {
+    this.config.live = enableLiveMode;
+}
+
+AnvatoPlayer.prototype.setTitle = function (title) {
+    this.config.title = title;
+}
+
+AnvatoPlayer.prototype.setDescription = function (description) {
+    this.config.description = description;
+}
+
+AnvatoPlayer.prototype.setPlayerSize = function (width, height) {
+    width = width.toString();
+    height = height.toString();
+    if (width.indexOf('%') !== -1) {
+        this.config.width = width;
+    } else {
+        this.config.width = width + 'px';
+    }
+    if (height.indexOf('%') !== -1) {
+        this.config.height = height;
+    } else {
+        this.config.height = height + 'px';
+    }
+}
+
+AnvatoPlayer.prototype.setVolume = function (volume) {
+    this.config.volume = volume;
+}
+
+AnvatoPlayer.prototype.setAutoPlay = function (enableAutoPlay) {
+    this.config.autoplay = enableAutoPlay;
+}
+
+AnvatoPlayer.prototype.setPoster = function (poster) {
+    this.config.poster = poster;
+}
+
+AnvatoPlayer.prototype.setShareEnable = function (shareEnable) {
+    this.config.share = shareEnable;
+}
+
+AnvatoPlayer.prototype.setShareLink = function (shareLink) {
+    this.config.shareLink = shareLink;
+}
+
+AnvatoPlayer.prototype.setPlayerControlEnable = function (playerControlEnable) {
+    this.config.control = playerControlEnable;
+}
+
+AnvatoPlayer.prototype.set360videoEnable = function (enable360video) {
+    this.config['360'] = enable360video;
+}
+
+AnvatoPlayer.prototype.setForceHTML5 = function (forceHTML5) {
+    this.config.html5 = forceHTML5;
+}
+
+AnvatoPlayer.prototype.setVideoAdTagURL = function (adTagURL, keyValues) {
+    // Both DFP & VP also support
+    this.config.plugins.dfp = {};
+    this.config.plugins.dfp.adTagUrl = adTagURL;
+    if (IsJsonString(keyValues)) {
+        this.config.plugins.dfp.keyValues = JSON.stringify(keyValues);
+    }
+}
+
+AnvatoPlayer.prototype.setDFPNetworkCode = function (dfpNetworkCode) {
+    this.dfpNetworkCode = dfpNetworkCode;
+}
+
+/*** Functions ***/
+AnvatoPlayer.prototype.createInstance = function (divId) {
+
+    anvp[this.id] = {};
+
+    var div = document.createElement('div');
+    div.id = this.id;
+    div.style.cssText = 'height:100%; position:relative;';
+
+    var anvpScript = document.createElement('script');
+    anvpScript.setAttribute('data-anvp', JSON.stringify(this.config));
+    anvpScript.src = this.anvpLoadPath;
+
+    div.appendChild(anvpScript);
+
+    if (document.getElementById(divId)) {
+        document.getElementById(divId).appendChild(div);
+    } else {
+        document.body.appendChild(div);
+    }
+
+    anvp[this.id].onReady = function (playerInstance) {
+        playerInstance.setListener(commonListener);
+
+        function commonListener(e) {
+            if (typeof liveStateChanged === 'function') {
+
+                if (typeof anvp[e.sender].customData === 'undefined') {
+                    anvp[e.sender].customData = {};
+                    anvp[e.sender].customData.sender = e.sender;
+                    anvp[e.sender].customData.errors = [];
+					if (typeof mute == 'undefined' || mute == true){
+						anvp[e.sender].mute();
+					}
+                }
+
+                switch (e.name) {
+                    case "STATE_CHANGE":
+                        if (e.args[0].length > 0) {
+                            switch (e.args[0]) {
+                                case "ready2PlayVideoContent":
+                                    liveStateChanged('STATE_CHANGE-ready2PlayVideoContent', anvp[e.sender].customData);
+                                    break;
+                                case "bufferingVideoContent":
+                                    liveStateChanged('STATE_CHANGE-bufferingVideoContent', anvp[e.sender].customData);
+                                    break;
+                                case "playingVideoContent":
+                                    liveStateChanged('STATE_CHANGE-playingVideoContent', anvp[e.sender].customData);
+                                    break;
+                                case "pausedVideoContent":
+                                    liveStateChanged('STATE_CHANGE-pausedVideoContent', anvp[e.sender].customData);
+                                    break;
+                            }
+                        }
+                        break;
+                    case "USER_PLAY":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_PLAY', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_RESUME":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_RESUME', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_GOLIVE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_GOLIVE', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_PAUSE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_PAUSE', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_MUTE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_MUTE', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_UNMUTE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_UNMUTE', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_SHARE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_SHARE', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_FORWARD_SEEK":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_FORWARD_SEEK', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_BACKWARD_SEEK":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_BACKWARD_SEEK', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_FULLSCREEN":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_FULLSCREEN', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "USER_CANCEL_FULLSCREEN":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            liveStateChanged('USER_CANCEL_FULLSCREEN', anvp[e.sender].customData);
+                        });
+                        break;
+                    case "CLIENT_BANDWIDTH":
+                        liveStateChanged('CLIENT_BANDWIDTH', anvp[e.sender].customData);
+                        break;
+                    case "METADATA_LOADED":
+                        liveStateChanged('METADATA_LOADED', anvp[e.sender].customData);
+                        break;
+                    case "FIRST_FRAME_READY":
+                        liveStateChanged('FIRST_FRAME_READY', anvp[e.sender].customData);
+                        break;
+                    case "MUTED":
+                        liveStateChanged('MUTED', anvp[e.sender].customData);
+                        break;
+                    case "UNMUTED":
+                        liveStateChanged('UNMUTED', anvp[e.sender].customData);
+                        break;
+                    case "PLAYING_START":
+                        anvp[e.sender].getDuration(function (duration) {
+                            anvp[e.sender].customData.duration = parseInt(duration, 10);
+                            anvp[e.sender].getTitle(function (title) {
+                                anvp[e.sender].customData.title = title;
+                                anvp[e.sender].getDescription(function (description) {
+                                    anvp[e.sender].customData.description = description;
+                                });
+                            });
+                        });
+                        break;
+                    case "VIDEO_STARTED":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.depth = 0;
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            anvp[e.sender].getVolume(function (volume) {
+                                anvp[e.sender].customData.volume = volume;
+                                anvp[e.sender].isFullscreen(function (isFullscreen) {
+                                    anvp[e.sender].customData.isFullscreen = isFullscreen;
+                                    liveStateChanged('VIDEO_STARTED', anvp[e.sender].customData);
+                                });
+                            });
+                        });
+                        break;
+                    case "VIDEO_FIRST_QUARTILE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.depth = 25;
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            anvp[e.sender].getVolume(function (volume) {
+                                anvp[e.sender].customData.volume = volume;
+                                anvp[e.sender].isFullscreen(function (isFullscreen) {
+                                    anvp[e.sender].customData.isFullscreen = isFullscreen;
+                                    liveStateChanged('VIDEO_FIRST_QUARTILE', anvp[e.sender].customData);
+                                });
+                            });
+                        });
+                        break;
+                    case "VIDEO_MID_POINT":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.depth = 50;
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            anvp[e.sender].getVolume(function (volume) {
+                                anvp[e.sender].customData.volume = volume;
+                                anvp[e.sender].isFullscreen(function (isFullscreen) {
+                                    anvp[e.sender].customData.isFullscreen = isFullscreen;
+                                    liveStateChanged('VIDEO_MID_POINT', anvp[e.sender].customData);
+                                });
+                            });
+                        });
+                        break;
+                    case "VIDEO_THIRD_QUARTILE":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.depth = 75;
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            anvp[e.sender].getVolume(function (volume) {
+                                anvp[e.sender].customData.volume = volume;
+                                anvp[e.sender].isFullscreen(function (isFullscreen) {
+                                    anvp[e.sender].customData.isFullscreen = isFullscreen;
+                                    liveStateChanged('VIDEO_THIRD_QUARTILE', anvp[e.sender].customData);
+                                });
+                            });
+                        });
+                        break;
+                    case "VIDEO_COMPLETED":
+                        anvp[e.sender].getCurrentTime(function (time) {
+                            anvp[e.sender].customData.depth = 100;
+                            anvp[e.sender].customData.currentTime = parseInt(time, 10);
+                            anvp[e.sender].getVolume(function (volume) {
+                                anvp[e.sender].customData.volume = volume;
+                                anvp[e.sender].isFullscreen(function (isFullscreen) {
+                                    anvp[e.sender].customData.isFullscreen = isFullscreen;
+                                    liveStateChanged('VIDEO_COMPLETED', anvp[e.sender].customData);
+                                });
+                            });
+                        });
+                        break;
+                    case "PLAYLIST_COMPLETED":
+                        liveStateChanged('PLAYLIST_COMPLETED', anvp[e.sender].customData);
+                        break;
+                    case "PLAYER_ERROR":
+                        if (e.args.length > 0 && typeof anvp[e.sender].customData.errors != 'undefined') {
+                            var errorObj = {};
+                            errorObj.time = e.time;
+                            errorObj.code = e.args[0];
+                            errorObj.definition = e.args[1];
+                            errorObj.isCritical = e.args[2];
+                            anvp[e.sender].customData.errors.push(errorObj);
+                        }
+                        liveStateChanged('PLAYER_ERROR', anvp[e.sender].customData);
+                        break;
+                    case "AD_STARTED":
+                        liveStateChanged('AD_STARTED', anvp[e.sender].customData);
+                        break;
+                    case "AD_FIRST_QUARTILE":
+                        liveStateChanged('AD_FIRST_QUARTILE', anvp[e.sender].customData);
+                        break;
+                    case "AD_MID_POINT":
+                        liveStateChanged('AD_MID_POINT', anvp[e.sender].customData);
+                        break;
+                    case "AD_THIRD_QUARTILE":
+                        liveStateChanged('AD_THIRD_QUARTILE', anvp[e.sender].customData);
+                        break;
+                    case "AD_COMPLETED":
+                        liveStateChanged('AD_COMPLETED', anvp[e.sender].customData);
+                        break;
+                    case "ALL_ADS_COMPLETED":
+                        liveStateChanged('ALL_ADS_COMPLETED', anvp[e.sender].customData);
+                        break;
+                    case "AD_CLICKED":
+                        liveStateChanged('AD_CLICKED', anvp[e.sender].customData);
+                        break;
+                    case "AD_SKIPPED":
+                        liveStateChanged('AD_SKIPPED', anvp[e.sender].customData);
+                        break;
+                }
+            }
+        }
+    }
+}
+
+/** Ads function **/
+AnvatoPlayer.prototype.generateDFPvideoTag = function (adUnit, adSize, extras) {
+    var size;
+    if (adSize.indexOf('x') != -1) {
+        size = adSize;
+    } else {
+        size = '640x360'; //default
+    }
+    var currentTimeStamp = new Date().getTime();
+
+    adSlot = 'http://pubads.g.doubleclick.net/gampad/ads?';
+    adSlot += 'sz=' + size + '&';
+    adSlot += 'iu=' + encodeURIComponent('/' + this.dfpNetworkCode + '/' + adUnit) + '&';
+    adSlot += 'impl=s&';
+    adSlot += 'gdfp_req=1&';
+    adSlot += 'env=vp&';
+    adSlot += 'output=vast&';
+    adSlot += 'unviewed_position_start=1&';
+    adSlot += 'url=' + encodeURIComponent(window.location.href) + '&';
+    adSlot += 'description_url=' + encodeURIComponent(window.location.href) + '&';
+    adSlot += 'correlator=' + currentTimeStamp;
+
+    var previewId = getUrlParam('dfppreview');
+    if ((typeof (previewId) != 'undefined' && previewId != '') || (extras != null && typeof (extras) != 'undefined')) {
+        adSlot += '&cust_params=';
+        if (typeof (previewId) != 'undefined' && previewId != '') {
+            adSlot += encodeURIComponent('dfppreview=' + previewId + '&');
+        }
+
+        for (var key in extras) {
+            if (extras.hasOwnProperty(key)) {
+                adSlot += encodeURIComponent(key + '=' + extras[key] + '&');
+            }
+        }
+
+    }
+    console.log("generateDFPvideoTag(): " + adSlot);
+    return adSlot;
+}
+
+var IsJsonString = function (str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+var getUrlParam = function (name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.href);
+    if (results == null)
+        return "";
+    else
+        return results[1];
+}

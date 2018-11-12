@@ -1,0 +1,128 @@
+// omo ad func
+
+  // this is also only for the example to update the user panel
+  function renderUserPanel(currentUser) {
+    var ebid = document.getCookie("ebid");
+    var nxtu = document.getCookie("nxtu");
+	
+    if (currentUser.isLoggedIn) {
+        $('.eb-user-panel').show();
+        $('.login-panel').hide(); 
+    } else {
+        //$('.eb-user-panel').hide();
+        $('.login-panel').show();
+    }
+	
+    if(ebid != '' && currentUser.isLoggedIn){
+        //early bird
+        var timestamp = new Date();
+        timestamp.setTime(1514735999000);
+        document.cookie = ebid+"="+nxtu+"; expires="+timestamp.toUTCString()+"; path=/;domain=.appledaily.com";							
+    }
+  }
+  
+// used for confirm user role
+function confirmOMOAdvFlag(){
+    var displayAdv  = true;
+    /*var ebid = document.getCookie("ebid");		
+    var nxtu_r = document.getCookie(ebid);		
+    var nxtu_s = document.getCookie("nxtu");		
+
+    if(ebid != '' && nxtu_r == nxtu_s && nxtu_s != ''){
+        $('.eb-user-panel').show();
+        return false;
+    }*/	  
+    return displayAdv;
+}  
+  
+function logOMOAccountProfile(type) {
+	var userInfo = OMOSDK.auth().getUserInfo() || null;
+    console.log(userInfo);
+	if (userInfo) {
+		if (userInfo.isLoggedIn && type === 'segVideo') {
+			nxmTrack.nxmAddSegVideo('OMO_ACCID=' + userInfo.currentAccount.accountId);
+			nxmTrack.nxmAddSegVideo('OMO_PID=' + userInfo.currentProfile.profileId);
+		} else if (userInfo.isLoggedIn && type === 'seg') {
+			nxmTrack.nxmAddSeg('OMO_ACCID=' + userInfo.currentAccount.accountId);
+			nxmTrack.nxmAddSeg('OMO_PID=' + userInfo.currentProfile.profileId);
+		}
+	}
+}
+  
+function ebCampaignActive(){
+    new Fingerprint2().get(function(result, components){  
+        var timestamp = new Date();
+        timestamp.setTime(1514735999000);
+        document.cookie = "ebid="+result+"; expires="+timestamp.toUTCString()+"; path=/;domain=.appledaily.com";						
+    });
+    //OMOSDK.auth().openLoginDialog();
+}
+
+function reloadByStatusChange(user) {
+    var timestamp = new Date();
+    timestamp.setTime(1514735999000);
+    var wasLoggedIn = (document.getCookie("isLoggedIn") == 'true');
+    if (!wasLoggedIn) {
+            document.cookie = "isLoggedIn=false; expires=" + timestamp.toUTCString() + "; path=/;domain=.appledaily.com";
+    }
+
+    if (!wasLoggedIn && user.isLoggedIn){
+            document.cookie = "isLoggedIn=true; expires=" + timestamp.toUTCString() + "; path=/;domain=.appledaily.com";
+            location.reload();
+    }
+}
+
+function getOMOCurrentVersion(){
+    return '[' + OMOSDK.version + '] ';
+}
+ 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+ 
+var OMOSDK = new OMO({
+    appId: "598aee773b729200504d1f31",
+    language: getParameterByName('lang', location.href) || 'zh',
+    region: getParameterByName('region', location.href) || 'TW'	
+});
+ 
+//running part
+$(document).ready(function() {
+    // set up the initial user panel state for the example
+    renderUserPanel(OMOSDK.auth().getUserInfo());
+
+  // listen for user change events
+    OMOSDK.auth().subscribe(function (user) {
+        var currentUser = OMOSDK.auth().getUserInfo() || null;
+        var ebid = document.getCookie("ebid");
+        var nxtu = document.getCookie("nxtu");
+        if(ebid != '' && currentUser.isLoggedIn){
+            var cmpg_host = '//cmpg.nextdigital.com.hk/1x1.gif?nxtu=' + nxtu+'&DID=&ADID=&ACTION=USER&CPID=EARLYBIRD&USRC=REG&CPREG=TW&Platform='+(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)?'MOBWEB':'WEB');
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", cmpg_host, true);
+            xhr.send();
+        }
+        renderUserPanel(user);
+        reloadByStatusChange(user);
+    });
+ });
+ 
+var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+var eventer = window[eventMethod];
+var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+eventer(messageEvent,function(e) {
+    var key = e.message ? "message" : "data";
+    var data = e[key];
+  if(data.eventId == 'earlybirdMessage') {
+         ebCampaignActive();
+  }
+},false);
+  
+  

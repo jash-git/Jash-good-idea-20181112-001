@@ -1,0 +1,132 @@
+.screen-18-over {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: #000000 url(safe-lock.png) center 25% no-repeat;
+}
+
+.screen-18-content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.screen-18-main-message {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  padding: 0 10px;
+}
+
+.screen-18-main-message > span {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.4em;
+  display: block;
+  text-align: center;
+}
+
+.screen-18-buttons {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  text-align: center;
+}
+
+.screen-18-button {
+  display: inline-block;
+  width: 220px;
+  height: 46px;
+  background-color: #dddddd;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 0 5px;
+  opacity: 1;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  -ms-transition: opacity 300ms;
+  -o-transition: opacity 300ms;
+  transition: opacity 300ms;
+}
+
+.screen-18-button > span {
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 15px auto;
+  padding-left: 20px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+  color: #555555;
+  font-size: 16px;
+  line-height: 46px;
+  text-align: center;
+}
+
+.screen-18-button.screen-18-confirm > span {
+  background-image: url(safe-confirm.png);
+}
+
+.screen-18-button.screen-18-cancel > span {
+  background-image: url(safe-cancel.png);
+}
+
+.screen-18-button:hover {
+  opacity: .85;
+}
+
+.screen-18-button:hover > span {
+  color: #222222;
+}
+
+.screen-18-over.done {
+  opacity: 0.9;
+  background: none;
+}
+
+.screen-18-over.done:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+}
+
+.screen-18-over.done .screen-18-content {
+  opacity: 0;
+}
+
+@media screen and (max-width:568px) {
+  .screen-18-over.resize {
+    background-size: 30px auto;
+    background-position: center 25%;
+  }
+
+  .resize .screen-18-main-message {
+    top: 45%;
+  }
+
+  .resize .screen-18-buttons {
+    top: 75%;
+  }
+
+  .resize .screen-18-button {
+    width: auto;
+    height: auto;
+    padding: 5px;
+  }
+
+  .resize .screen-18-button > span {
+    line-height: 1em;
+  }
+}

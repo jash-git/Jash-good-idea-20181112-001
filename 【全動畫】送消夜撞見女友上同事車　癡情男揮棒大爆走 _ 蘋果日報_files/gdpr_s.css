@@ -1,0 +1,91 @@
+body{margin:0 auto; padding:0; font-family: Helvetica Neue,Helvetica,Arial,sans-serif;}
+#div-GDPR-message{
+    position:relative;
+}
+.cookies-container{
+    width:100%;
+    background: #e7f5f6;
+    padding:12px 0;
+    -webkit-display:flex;
+    display: flex;
+    -webkit-justify-content: center;
+    -webkit-align-items: stretch;
+    justify-content: center;
+    align-items: stretch;
+    color:#664242;
+}
+.cookies-container > div {
+    padding: 0 34px;
+}
+.cookies-container .cookie-title{
+    color:#664242;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    padding-right:0;
+}
+.cookies-container .cookie-title span{
+    display: inline-block;
+    width:36px;
+    height:36px;
+    background-size:cover;
+    margin-right: 10px;
+}
+.cookies-container .cookie-content, .cookies-container .cookie-content a{
+    color:#575757;
+    font-size: 12px;
+    margin-top:3px;
+}
+.cookies-container .cookie-btn .btn-accept{
+    background: #168cc7;
+    color:#fff;
+    border-radius: 6px;
+    padding:8px 24px 8px 42px;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+}
+.cookies-container .cookie-btn .btn-accept:after{
+    display:block;
+    content:'';
+    background:url(../img/cookie-tick.png) no-repeat;
+    width:18px;
+    height: 18px;
+    background-size:cover;
+    position: absolute;
+    top:8px;
+    left:21px;
+}
+.desktop-only{
+    display: block;
+}
+@media only screen and (max-width: 1024px){
+    #div-GDPR-message{
+    }
+    .cookies-container{
+        background:#fff;
+        flex-flow: column nowrap;
+        -webkit-flex-flow:column nowrap;
+    }
+    .desktop-only{
+        display: none;
+    }
+    .cookies-container .cookie-title{
+        padding-left:16px;
+    }
+    .cookies-container .cookie-title span{
+        width:21px;
+        height: 21px;
+    }
+    .cookies-container .cookie-content{
+        padding-left: 48px;
+        padding-bottom: 12px;
+    }
+    .cookies-container .cookie-btn{
+        padding-right: 16px;
+    }
+    .cookies-container .cookie-btn .btn-accept{
+        float:right;
+        border-radius: 4px;
+    }
+}

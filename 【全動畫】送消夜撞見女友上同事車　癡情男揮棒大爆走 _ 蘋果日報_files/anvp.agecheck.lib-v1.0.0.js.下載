@@ -1,0 +1,73 @@
+;(function(window, $){
+  AnvatoPlayer.prototype.setOver18 = function (over18) {
+    if (over18) {
+      var that = this;
+      this.setAutoPlay(false);
+      this.over18 = over18;
+
+      var over18msg = {};
+      over18msg.message = '此內容僅提供年滿18歲讀者觀賞，請確認您是否已滿18歲？';
+      over18msg.cancelMessage = '未滿18歲者不得瀏覽觀看';
+      over18msg.confirm = '已滿18歲';
+      over18msg.cancel = '未滿18歲';
+
+      var screen = '';
+      screen += '<div class="screen-18-over">';
+        screen += '<div class="screen-18-content">';
+          screen += '<div class="screen-18-main-message">';
+            screen += '<span>'+over18msg.message+'</span>';
+          screen += "</div>";
+          screen += '<div class="screen-18-buttons">';
+            screen += '<div class="screen-18-button screen-18-confirm">';
+              screen += '<span>'+over18msg.confirm+'</span>';
+            screen += "</div>";
+            screen += '<div class="screen-18-button screen-18-cancel">';
+              screen += '<span>'+over18msg.cancel+'</span>';
+            screen += "</div>";
+          screen += "</div>";
+        screen += "</div>";
+      screen += "</div>";
+      var $screen = $(screen);
+      if (this.config && (this.config.width == '100%')) {
+        $screen.addClass('resize');
+      }
+      $screen.find('.screen-18-confirm').click(function() {
+        if (!that.isMobile) {
+          $('#'+that.id).show();
+          anvp[that.id].play();
+          $screen.addClass('done');
+          setTimeout(function() {
+            $screen.remove();
+          }, 1000);
+        } else {
+          $('#'+that.id).show();
+          anvp[that.id].play();
+          $screen.remove();
+        }
+      });
+      $screen.find('.screen-18-cancel').click(function() {
+        $screen.find('.screen-18-buttons').hide();
+        $screen.find('.screen-18-main-message > span').text(over18msg.cancelMessage);
+      });
+
+      this.over18screen = $screen;
+
+      AnvatoPlayer.prototype.createInstanceDft = AnvatoPlayer.prototype.createInstance;
+      AnvatoPlayer.prototype.createInstance = function (divId) {
+        this.createInstanceDft(divId);
+        var id = this.id;
+        var screen = this.over18screen;
+        if (this.over18) {
+          var onReadyDft = anvp[this.id].onReady;
+          anvp[this.id].onReady = function (playerInstance) {
+            onReadyDft(playerInstance);
+            $('#'+id).hide();
+            $('#'+id).parent().append(screen);
+          }
+        }
+      }
+    }
+  };
+
+
+})(window, jQuery);

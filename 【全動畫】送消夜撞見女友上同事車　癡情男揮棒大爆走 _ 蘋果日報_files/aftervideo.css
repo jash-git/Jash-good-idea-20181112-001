@@ -1,0 +1,74 @@
+.aftervideo {
+  display: block;
+  width: 790px;
+  height: 444px;
+  margin-top: -30px;
+  background: transparent url(../img/aftervideo_bg.png);
+  display: none;
+}
+.aftervideo .wrapper {
+    margin: 16px 50px 16px 50px;
+    padding-top: 15px;
+}
+.aftervideo .item {
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  overflow: hidden;
+  width: 300px;
+  height: 188px;
+  float: left;
+  margin: 10px 25px 10px 20px;
+}
+.aftervideo .item a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image:url(../img/aftervideo_vbg.png);
+  background-color:transparent;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:cover;
+  position: relative;
+}
+.aftervideo .item a:hover {
+  background: none;
+}
+.aftervideo .item a:after {
+  content: " ";
+  display: block;
+  width: 100%;
+  height: 80%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: transparent url(../img/aftervideo_play.png) center center no-repeat;
+}
+
+.aftervideo .item span {
+        display:block;
+        position:absolute;
+        width:100%;
+        height:30px;
+        font-size:16px;
+        color:white;
+        background:black;
+        opacity:0.8;
+        filter:alpha(opacity=80);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        bottom: 0px;
+        line-height:30px;
+        text-indent:5px;
+}
+
+.aftervideo .item a:after {
+  content: url('../img/aftervideo_play.png');
+  display: block;
+  width: 64px;
+  height: 66px;
+  position: absolute;
+  left: 40%;
+  top: 25%;
+}
